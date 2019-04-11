@@ -13,5 +13,33 @@ queue()
     .await(makeGraphs);
     
 function makeGraphs(error, salaryData){
+    //load data in crossfilter
+    var ndx = crossfilter(salaryData);
+    //pass ndx variable to function
+    show_gender_balance(ndx);
     
+    //Render the chart
+    dc.renderAll();
+}
+
+function show_gender_balance(ndx){
+    //Create dimension and pluck data
+    var dim = ndx.dimension(dc.pluck("sex"));
+    
+    //Create group
+    var group = dim.group();
+    
+    //Render barChart on ID
+    dc.barChart("#gender-balance")
+        .width(400)
+        .height(300)
+        .margins({top:10, right:50, bottom: 30, left: 50})
+        .dimension(dim)
+        .group(group)
+        .transitionDuration(500)
+        .x(d3.scale.ordinal())
+        .xUnits(dc.units.ordinal)
+        .elasticY(true)
+        .xAxisLabel("Gender")
+        .yAxis().ticks(20);
 }
