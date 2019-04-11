@@ -16,11 +16,25 @@ function makeGraphs(error, salaryData){
     //load data in crossfilter
     var ndx = crossfilter(salaryData);
     //pass ndx variable to function
+    show_discipline_selector(ndx);
     show_gender_balance(ndx);
     
     //Render the chart
     dc.renderAll();
 }
+
+
+function show_discipline_selector(ndx){
+    
+    dim = ndx.dimension(dc.pluck("discipline"));
+    
+    group = dim.group();
+    
+    dc.selectMenu("#discipline-selector")
+        .dimension(dim)
+        .group(group);
+}
+
 
 function show_gender_balance(ndx){
     //Create dimension and pluck data
@@ -39,7 +53,7 @@ function show_gender_balance(ndx){
         .transitionDuration(500)
         .x(d3.scale.ordinal())
         .xUnits(dc.units.ordinal)
-        .elasticY(true)
+        //.elasticY(true) causing problem with selectMenu
         .xAxisLabel("Gender")
         .yAxis().ticks(20);
 }
