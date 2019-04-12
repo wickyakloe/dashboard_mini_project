@@ -19,10 +19,13 @@ function makeGraphs(error, salaryData){
     //Data read in treats the salary column as text
     salaryData.forEach(function(d){
         d.salary = parseInt(d.salary);
+        //Wrap in brackets because yrs_service has dot in it
+        d.yrs_service = parseInt(d["yrs.service"]);
     })
     
     //pass ndx variable to function
     show_discipline_selector(ndx);
+    
     
     show_percent_that_are_professors(ndx, "Female", "#percent-of-women-professors");
     show_percent_that_are_professors(ndx, "Male", "#percent-of-men-professors");
@@ -31,6 +34,8 @@ function makeGraphs(error, salaryData){
     show_gender_balance(ndx);
     show_average_salaries(ndx);
     show_rank_distribution(ndx);
+    
+    show_service_to_salary_correlation(ndx);
     
     //Render the chart
     dc.renderAll();
@@ -240,4 +245,44 @@ function show_rank_distribution(ndx) {
         .margins({top: 10, right: 100, bottom: 30, left: 30})
         .xAxisLabel("Rank");
     
+}
+
+
+function show_service_to_salary_correlation(ndx) {
+    //Show correlation between years service and salary
+    
+    //Define colors for gender
+      var genderColors = d3.scale.ordinal()
+            .domain(["Female", "Male"])
+            .range(["pink", "blue"]);
+    
+    var eDim = ndx.dimension(dc.pluck("yrs_service"));
+    var experienceDim = ndx.dimension(function(d) {
+        return [d.yrs_service, d.salary, d.rank, d.sex];
+    });
+    var experienceSalaryGroup = experienceDim.group();
+
+    var minExperience = eDim.bottom(1)[0].yrs_service;
+    var maxExperience = eDim.top(1)[0].yrs_service;
+
+    dc.scatterPlot("#service-salary")
+        .width(800)
+        .height(400)
+        .x(d3.scale.linear().domain([minExperience, maxExperience]))
+        .brushOn(false)
+        .symbolSize(8)
+        .clipPadding(10)
+        .xAxisLabel("Years Of Service")
+        .title(function(d) {
+            return d.key[2] + " earned " + d.key[1];
+        })
+        //Append colors to plot
+        .colorAccessor(function (d) {
+            return d.key[3];
+        })
+        .colors(genderColors)
+        //
+        .dimension(experienceDim)
+        .group(experienceSalaryGroup)
+        .margins({top: 10, right: 50, bottom: 75, left: 75});
 }
