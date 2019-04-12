@@ -314,7 +314,7 @@ function show_phd_to_salary_correlation(ndx) {
         .brushOn(false)
         .symbolSize(8)
         .clipPadding(10)
-        .xAxisLabel("Salary")
+        .yAxisLabel("Salary")
         .xAxisLabel("Years Since PhD")
         .title(function(d) {
             return d.key[2] + " earned " + d.key[1];
