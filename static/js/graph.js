@@ -23,6 +23,11 @@ function makeGraphs(error, salaryData){
     
     //pass ndx variable to function
     show_discipline_selector(ndx);
+    
+    show_percent_that_are_professors(ndx, "Female", "#percent-of-women-professors");
+    show_percent_that_are_professors(ndx, "Male", "#percent-of-men-professors");
+
+
     show_gender_balance(ndx);
     show_average_salaries(ndx);
     show_rank_distribution(ndx);
@@ -41,6 +46,47 @@ function show_discipline_selector(ndx){
     dc.selectMenu("#discipline-selector")
         .dimension(dim)
         .group(group);
+}
+
+
+function show_percent_that_are_professors(ndx, gender, element) {
+    //When not plotting data on chart we dont need dimension and group
+    var percentageThatAreProf = ndx.groupAll().reduce(
+        function(p, v) {
+            if (v.sex === gender) {
+                p.count++;
+                if(v.rank === "Prof") {
+                    p.are_prof++;
+                }
+            }
+            return p;
+        },
+        function(p, v) {
+            if (v.sex === gender) {
+                p.count--;
+                if(v.rank === "Prof") {
+                    p.are_prof--;
+                }
+            }
+            return p;
+        },
+        function() {
+            return {count: 0, are_prof: 0};    
+        },
+    );
+    
+    dc.numberDisplay(element)
+        //show as percentage with 2 decimal places
+        .formatNumber(d3.format(".2%"))
+        //Used valueAccessor because we used custom reducer
+        .valueAccessor(function (d) {
+            if (d.count == 0) {
+                return 0;
+            } else {
+                return (d.are_prof / d.count);
+            }
+        })
+        .group(percentageThatAreProf)
 }
 
 
